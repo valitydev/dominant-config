@@ -1,0 +1,4 @@
+[submodule "damsel"]
+	path = damsel
+	url = https://github.com/valitydev/damsel.git
+	branch = master
