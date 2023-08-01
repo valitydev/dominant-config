@@ -30,7 +30,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/dominant/create-account.sh RUB)}
               }
             ]
         }
@@ -44,8 +44,8 @@ FIXTURE=$(cat <<END
               {
                 "key": {"symbolic_code": "RUB"},
                 "value": {
-                  "income": $(./create-account.sh RUB),
-                  "outcome": $(./create-account.sh RUB)
+                  "income": $(./scripts/dominant/create-account.sh RUB),
+                  "outcome": $(./scripts/dominant/create-account.sh RUB)
                 }
               }
             ]
@@ -85,6 +85,14 @@ FIXTURE=$(cat <<END
                             "bank_card": {
                               "payment_system": {"id": "VISA"},
                               "is_cvv_empty": false
+                            }
+                          }
+                        },
+                        {
+                          "id": {
+                            "bank_card": {
+                              "payment_system": {"id": "VISA"},
+                              "is_cvv_empty": true
                             }
                           }
                         }
@@ -167,12 +175,20 @@ FIXTURE=$(cat <<END
                                 "is_cvv_empty": false
                               }
                             }
+                          },
+                          {
+                            "id": {
+                              "bank_card": {
+                                "payment_system": {"id": "VISA"},
+                                "is_cvv_empty": true
+                              }
+                            }
                           }
                         ]
                       },
                       "lifetime": {
                         "value": {
-                          "seconds": 10000
+                          "seconds": 5
                         }
                       }
                     },
@@ -184,6 +200,14 @@ FIXTURE=$(cat <<END
                               "bank_card": {
                                 "payment_system": {"id": "VISA"},
                                 "is_cvv_empty": false
+                              }
+                            }
+                          },
+                          {
+                            "id": {
+                              "bank_card": {
+                                "payment_system": {"id": "VISA"},
+                                "is_cvv_empty": true
                               }
                             }
                           }
@@ -244,6 +268,14 @@ FIXTURE=$(cat <<END
                               "is_cvv_empty": false
                             }
                           }
+                        },
+                        {
+                          "id": {
+                            "bank_card": {
+                              "payment_system": {"id": "VISA"},
+                              "is_cvv_empty": true
+                            }
+                          }
                         }
                       ]
                     }
@@ -255,6 +287,10 @@ FIXTURE=$(cat <<END
     }}}},
     {"insert": {"object": {"contract_template": {
         "ref": {"id": 1},
+        "data": {"terms": {"id": 1}}
+    }}}},
+    {"insert": {"object": {"contract_template": {
+        "ref": {"id": 10000},
         "data": {"terms": {"id": 1}}
     }}}},
     {"insert": {"object": {"currency": {
@@ -309,7 +345,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/dominant/create-account.sh RUB)}
               }
             ],
             "terms": {
@@ -331,6 +367,14 @@ FIXTURE=$(cat <<END
                         "bank_card": {
                           "payment_system": {"id": "VISA"},
                           "is_cvv_empty": false
+                        }
+                      }
+                    },
+                    {
+                      "id": {
+                        "bank_card": {
+                          "payment_system": {"id": "VISA"},
+                          "is_cvv_empty": true
                         }
                       }
                     }
@@ -429,7 +473,7 @@ FIXTURE=$(cat <<END
                 "holds": {
                   "lifetime": {
                     "value": {
-                      "seconds": 10000
+                      "seconds": 5
                     }
                   }
                 },
@@ -528,6 +572,14 @@ FIXTURE=$(cat <<END
                           "is_cvv_empty": false
                         }
                       }
+                    },
+                    {
+                      "id": {
+                        "bank_card": {
+                          "payment_system": {"id": "VISA"},
+                          "is_cvv_empty": true
+                        }
+                      }
                     }
                   ]
                 }
@@ -550,6 +602,15 @@ FIXTURE=$(cat <<END
             "name": "VISA",
             "description": "VISA bank cards"
         }
+    }}}},
+    {"insert": {"object": {"payment_method": {
+        "ref": {
+            "id": {"bank_card": {"payment_system": {"id": "VISA"},"is_cvv_empty": true}}
+          },
+          "data": {
+            "name": "Visa NOCVV",
+            "description": "No"
+          }
     }}}},
     {"insert": {"object": {"terminal": {
         "ref": {"id": 1},
@@ -649,11 +710,27 @@ FIXTURE=$(cat <<END
             "identity" : "1",
             "payment_routing_rules" : {"policies": {"id":1},"prohibitions": {"id":2}}
         }
+    }}}},
+    {"insert": {"object": {"payment_institution": {
+        "ref": {"id": 100},
+        "data": {
+            "name": "Live(other test for test purpose) Payment Institution",
+            "system_account_set": {"value": {"id": 1}},
+            "default_contract_template": {"value": {"id": 1}},
+            "default_wallet_contract_template": {"value": {"id": 1}},
+            "providers": {"value": [{"id": 1}]},
+            "inspector": {"value": {"id": 1}},
+            "realm": "test",
+            "wallet_system_account_set": {"value": {"id": 1}},
+            "residences": ["rus", "aus", "jpn"],
+            "identity" : "1",
+            "payment_routing_rules" : {"policies": {"id":1},"prohibitions": {"id":2}}
+        }
     }}}}
 ]}
 END
 )
 
-woorl -s "../damsel/proto/domain_config.thrift" "http://dominant:8022/v1/domain/repository" Repository Commit ${VERSION} "${FIXTURE}"
+woorl -s "./damsel/proto/domain_config.thrift" "http://dominant:8022/v1/domain/repository" Repository Commit ${VERSION} "${FIXTURE}"
 
 echo -e "\n"
