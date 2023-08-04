@@ -59,7 +59,7 @@ FIXTURE=$(cat <<END
           "proxy": {"ref": {"id": 5}, "additional": []},
           "fallback_risk_score": "high"
         }
-      }}}},
+    }}}},
     {"insert": {"object": {"term_set_hierarchy": {
         "ref": {"id": 1},
         "data": {
@@ -278,6 +278,104 @@ FIXTURE=$(cat <<END
                           }
                         }
                       ]
+                    }
+                  },
+                  "wallets": {
+                    "currencies": {
+                      "value": [
+                        {
+                          "symbolic_code": "RUB"
+                        }
+                      ]
+                    },
+                    "wallet_limit": {
+                      "value": {
+                        "upper": {
+                          "inclusive": {
+                            "amount": 10000000,
+                            "currency": {
+                              "symbolic_code": "RUB"
+                            }
+                          }
+                        },
+                        "lower": {
+                          "inclusive": {
+                            "amount": -1000000000,
+                            "currency": {
+                              "symbolic_code": "RUB"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "withdrawals": {
+                      "currencies": {
+                        "value": [
+                          {
+                            "symbolic_code": "RUB"
+                          }
+                        ]
+                      },
+                      "payout_methods": {"value": []},
+                      "methods": {"value": [
+                        {
+                          "id": {
+                            "bank_card": {
+                              "payment_system": {"id": "VISA"},
+                              "is_cvv_empty": false
+                            }
+                          }
+                        },
+                        {
+                          "id": {
+                            "bank_card": {
+                              "payment_system": {"id": "VISA"},
+                              "is_cvv_empty": true
+                            }
+                          }
+                        }
+                      ]},
+                      "cash_limit": {
+                        "value": {
+                          "upper": {
+                            "exclusive": {
+                              "amount": 10000000,
+                              "currency": {
+                                "symbolic_code": "RUB"
+                              }
+                            }
+                          },
+                          "lower": {
+                            "inclusive": {
+                              "amount": 0,
+                              "currency": {
+                                "symbolic_code": "RUB"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cash_flow": {
+                        "value": [
+                          {
+                            "source": {
+                              "wallet": "sender_settlement"
+                            },
+                            "destination": {
+                              "wallet": "receiver_destination"
+                            },
+                            "volume": {
+                              "share": {
+                                "parts": {
+                                  "p": 1,
+                                  "q": 1
+                                },
+                                "of": "operation_amount"
+                              }
+                            }
+                          }
+                        ]
+                      }
                     }
                   }
                 }
@@ -596,6 +694,77 @@ FIXTURE=$(cat <<END
             }
           }
     }}}},
+    {"insert": {"object": {"provider": {
+        "ref": {"id": 2},
+        "data": {
+            "name": "Mocketbank payouts",
+            "description": "No",
+            "proxy": {
+              "ref": {
+                "id": 3
+              },
+              "additional": {
+                "k": "v"
+              }
+            },
+            "identity": "1",
+            "accounts": [
+              {
+                "key": {
+                  "symbolic_code": "RUB"
+                },
+                "value": {
+                  "settlement": $(./scripts/dominant/create-account.sh RUB)
+                }
+              }
+            ],
+            "terms": {
+              "wallet": {
+                "withdrawals": {
+                  "currencies": {
+                    "value": [
+                      {
+                        "symbolic_code": "RUB"
+                      }
+                    ]
+                  },
+                  "payout_methods": {"value": []},
+                  "cash_limit": {
+                    "value": {
+                      "upper": {
+                        "inclusive": {
+                          "amount": 10000000,
+                          "currency": {
+                            "symbolic_code": "RUB"
+                          }
+                        }
+                      },
+                      "lower": {
+                        "inclusive": {
+                          "amount": 0,
+                          "currency": {
+                            "symbolic_code": "RUB"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "cash_flow": {
+                    "value": []
+                  }
+                }
+              }
+            },
+            "terminal": {
+              "value": [
+                {
+                  "id": 3,
+                  "priority": 1000
+                }
+              ]
+            }
+        }
+    }}}},
     {"insert": {"object": {"payment_method": {
         "ref": {"id": {"bank_card": {"payment_system": {"id": "VISA"}}}},
         "data": {
@@ -625,6 +794,20 @@ FIXTURE=$(cat <<END
             }
         }
     }}}},
+    {"insert": {"object": {"terminal": {
+        "ref": {"id": 2},
+        "data": {
+          "name": "Mocketbank Payout terminal",
+          "description": "No",
+          "options": {
+            "k": "v"
+          },
+          "risk_coverage": "high",
+          "provider_ref": {
+            "id": 2
+          }
+        }
+    }}}},
     {"insert": {"object": {"proxy": {
         "ref": {"id": 1},
         "data": {
@@ -635,18 +818,36 @@ FIXTURE=$(cat <<END
         }
     }}}},
     {"insert": {"object": {"proxy": {
-        "ref": {
-          "id": 5
-        },
+        "ref": {"id": 3},
+        "data": {
+            "name": "Mocketbank Proxy Payouts",
+            "description": "Proxy test Payouts",
+            "url": "http://proxy-mocketbank:8022/proxy/mocketbank/p2p-credit",
+            "options": {
+              "timer_timeout": "10"
+            }
+        }
+    }}}},
+    {"insert": {"object": {"proxy": {
+        "ref": {"id": 5},
         "data": {
           "name": "Fraudbusters",
           "description": "Fraudbusters",
           "url": "http://fraudbusters:8022/fraud_inspector/v1",
           "options": []
         }
-      }}}},
+    }}}},
     {"insert": {"object": {"routing_rules": {
         "ref": {"id": 1},
+        "data": {
+            "name": "Empty ruleset for prohibitions",
+            "decisions": {
+              "candidates": []
+            }
+          }
+    }}}},
+    {"insert": {"object": {"routing_rules": {
+        "ref": {"id": 2},
         "data": {
             "name": "Роутинг по валюте",
             "decisions": {
@@ -669,11 +870,25 @@ FIXTURE=$(cat <<END
           }
     }}}},
     {"insert": {"object": {"routing_rules": {
-        "ref": {"id": 2},
+        "ref": {"id": 3},
         "data": {
-            "name": "Empty ruleset for prohibitions",
+            "name": "Роутинг выплат по валюте",
             "decisions": {
-              "candidates": []
+              "candidates": [
+                {
+                  "allowed": {
+                    "condition": {
+                      "currency_is": {
+                        "symbolic_code": "RUB"
+                      }
+                    }
+                  },
+                  "terminal": {
+                    "id": 2
+                  },
+                  "priority": 1000
+                }
+              ]
             }
           }
     }}}},
@@ -708,7 +923,8 @@ FIXTURE=$(cat <<END
             "wallet_system_account_set": {"value": {"id": 1}},
             "residences": ["rus", "aus", "jpn"],
             "identity" : "1",
-            "payment_routing_rules" : {"policies": {"id":1},"prohibitions": {"id":2}}
+            "withdrawal_routing_rules" : {"policies": {"id":3},"prohibitions": {"id":1}},
+            "payment_routing_rules" : {"policies": {"id":2},"prohibitions": {"id":1}}
         }
     }}}},
     {"insert": {"object": {"payment_institution": {
@@ -724,7 +940,8 @@ FIXTURE=$(cat <<END
             "wallet_system_account_set": {"value": {"id": 1}},
             "residences": ["rus", "aus", "jpn"],
             "identity" : "1",
-            "payment_routing_rules" : {"policies": {"id":1},"prohibitions": {"id":2}}
+            "withdrawal_routing_rules" : {"policies": {"id":3},"prohibitions": {"id":1}},
+            "payment_routing_rules" : {"policies": {"id":2},"prohibitions": {"id":1}}
         }
     }}}}
 ]}
