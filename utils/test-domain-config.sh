@@ -30,7 +30,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./scripts/dominant/create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/create-account.sh RUB)}
               }
             ]
         }
@@ -44,8 +44,8 @@ FIXTURE=$(cat <<END
               {
                 "key": {"symbolic_code": "RUB"},
                 "value": {
-                  "income": $(./scripts/dominant/create-account.sh RUB),
-                  "outcome": $(./scripts/dominant/create-account.sh RUB)
+                  "income": $(./scripts/create-account.sh RUB),
+                  "outcome": $(./scripts/create-account.sh RUB)
                 }
               }
             ]
@@ -443,7 +443,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./scripts/dominant/create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/create-account.sh RUB)}
               }
             ],
             "terms": {
@@ -714,7 +714,7 @@ FIXTURE=$(cat <<END
                   "symbolic_code": "RUB"
                 },
                 "value": {
-                  "settlement": $(./scripts/dominant/create-account.sh RUB)
+                  "settlement": $(./scripts/create-account.sh RUB)
                 }
               }
             ],
@@ -948,6 +948,6 @@ FIXTURE=$(cat <<END
 END
 )
 
-woorl -s "./damsel/proto/domain_config.thrift" "http://dominant:8022/v1/domain/repository" Repository Commit ${VERSION} "${FIXTURE}"
+woorl -s "../damsel/proto/domain_config.thrift" "http://dominant:8022/v1/domain/repository" Repository Commit ${VERSION} "${FIXTURE}"
 
 echo -e "\n"

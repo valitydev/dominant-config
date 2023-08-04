@@ -30,7 +30,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/create-account.sh RUB)}
               }
             ]
         }
@@ -44,8 +44,8 @@ FIXTURE=$(cat <<END
               {
                 "key": {"symbolic_code": "RUB"},
                 "value": {
-                  "income": $(./create-account.sh RUB),
-                  "outcome": $(./create-account.sh RUB)
+                  "income": $(./scripts/create-account.sh RUB),
+                  "outcome": $(./scripts/create-account.sh RUB)
                 }
               }
             ]
@@ -309,7 +309,7 @@ FIXTURE=$(cat <<END
             "accounts": [
               {
                 "key": {"symbolic_code": "RUB"},
-                "value": {"settlement": $(./create-account.sh RUB)}
+                "value": {"settlement": $(./scripts/create-account.sh RUB)}
               }
             ],
             "terms": {
